@@ -6,7 +6,6 @@
 --  - prune (file rotation)
 --  - remote copies
 --  - per-service UI
---  - script-based data (sql/ldap exports)
 ---
 
 CONFIGURATION_DIRECTORY = "/etc/yunobackup"
@@ -100,6 +99,14 @@ Context = class
 			for file in *(service.files or {})
 				print "file:", file
 				table.insert args, file
+
+			for script in *(service.scripts or {})
+				print "script:", script
+				scriptProcess = io.popen script, "r"
+				for file in scriptProcess\lines!
+					print "file:", "... " .. file
+					table.insert args, file
+				scriptProcess\close!
 
 			borg = process.exec "borg", args
 			result = process.waitpid borg\pid!
